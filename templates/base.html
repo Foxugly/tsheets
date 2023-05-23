@@ -1,0 +1,122 @@
+{% load static i18n common_tags hijack django_bootstrap5 %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    {% bootstrap_css %}
+    <link rel="stylesheet" type="text/css" href="{% static "fontawesome/css/all.min.css" %}"/>
+    <link rel="stylesheet" type="text/css"
+          href='{% static "bootstrap4-datetimepicker/css/bootstrap-datetimepicker.min.css" %}'/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"/>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{% static 'style.css' %}"/>
+</head>
+<body>
+{% include "_header.html" %}
+<div class="container-fluid" style="margin-top: 55px;">
+    <div class="row flex-nowrap">
+        <div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-danger">
+            <div class="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white">
+                {% include "_sidebar.html" %}
+            </div>
+        </div>
+        <div class="col py-3" style="min-height: calc(100vh - 55px);">
+            {% bootstrap_messages %}
+            {% block content %}{% endblock content %}
+        </div>
+    </div>
+</div>
+{% include "_modal.html" %}
+{% include "_toast.html" %}
+
+
+{% bootstrap_javascript %}
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+<script src="{% static 'js/jquery.bootstrap.modal.forms.js' %}"></script>
+<script type="text/javascript" src="//momentjs.com/downloads/moment-with-locales.js"></script>
+<script type="text/javascript"
+        src="{% static 'bootstrap4-datetimepicker/js/bootstrap-datetimepicker.min.js' %}"></script>
+<script>
+    $(document).ready(function () {
+        $('select').select2({theme: 'bootstrap-5',  }); // width: 'resolve'
+        $(".add").each(function () {
+            $(this).modalForm({formURL: $(this).data("form-url") + "?next=" + $(this).data('next')});
+        });
+        $(".delete").each(function () {
+            $(this).modalForm({formURL: $(this).data("form-url"), isDeleteForm: true});
+        });
+        $('.search').on('click', function () {
+            var url = '/week/search/';
+            var values = {
+                'user': $('#user').val(),
+                'week': $('#week').val(),
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            };
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: values,
+                traditional: true,
+                dataType: 'json',
+                success: function (result) {
+                    if (result['return']) {
+                        location.pathname = result['url'];
+                    } else {
+                        const toast = new bootstrap.Toast(document.getElementById('toastAlert'));
+                        $("#toast_title").text("{% trans "Week info" %}");
+                        $("#toast_content").text("{% trans "The asked week doesn't exist." %}");
+                        toast.show();
+                    }
+                }
+            });
+        });
+
+        $(".positive").on('change', function () {
+            var duration = $(this).val();
+            if (duration < 0 || duration > 24) {
+                $(this).val("");
+                const toast = new bootstrap.Toast(document.getElementById('toastAlert'));
+                $("#toast_title").text("{% trans "Duration alert" %}");
+                $("#toast_content").text("{% trans "The encoded duration is not correct." %}");
+                toast.show();
+            }
+        });
+        $("#select_team").on('change', function () {
+            var url = '/accounts/ajax/team/';
+            var values = {
+                'team': $(this).val(),
+                "csrfmiddlewaretoken": "{{ csrf_token }}"
+            };
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: values,
+                traditional: true,
+                dataType: 'json',
+                success: function (result) {
+                    if (result['return']) {
+                        location.reload();
+                    } else {
+                        const toast = new bootstrap.Toast(document.getElementById('toastAlert'));
+                        $("#toast_title").text("{% trans "Team info" %}");
+                        $("#toast_content").text("{% trans "we have a problem." %}");
+                        toast.show();
+                    }
+                }
+            });
+
+
+
+
+
+        });
+        {% block javascript %}{%  endblock javascript %}
+
+    }); // end document
+</script>
+</body>
+</html>

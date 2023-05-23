@@ -1,0 +1,25 @@
+table{
+  width:100%;
+}
+
+.cal_green{
+  color: #198754;
+}
+
+.cal_yellow{
+  color:#ffc107;
+}
+
+.cal_red{
+  color:#dc3545;
+}
+
+.colorpicker {
+    height: 100%;
+    max-width: 100px;
+}
+
+.pagination{
+  float:left;
+}
+

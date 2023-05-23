@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load i18n common_tags django_bootstrap5 %}
+{% block content %}
+    <div class="d-flex justify-content-between">
+        <div class="p-2"><a class="btn btn-secondary text-left ml-3"
+                            href="{{ model.get_list_url }}">{% trans "Back" %}</a></div>
+        <div class="p-2"><h1>{{ title }}</h1></div>
+        <div class="p-2"></div>
+    </div>
+    <div class="row">
+        <div class="col col-12 sm-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <div class="p-2"></div>
+                        <div class="p-2"><h3 class="mb-0">{{ model|verbose_name_plural | title }}</h3></div>
+                        <div class="p-2">
+                            <a class="btn btn-success" href="{{ object.get_xls_url }}"><span
+                                    class="fa fa-file-excel"></span></a>
+                            <a class="btn btn-warning" href="{{ object.get_zip_url }}"><span
+                                    class="fa fa-file-archive"></span></a>
+                        </div>
+                    </div>
+                </div>
+                <table class="card-table table table-striped table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-center">Sum of encoded hours</th>
+                        <th class="text-center">Sum of planned hours</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for umr in object.get_umrs_list %}
+                        <tr>
+                            <td><a href="{{ umr.get_detail_url }}">{{ umr }}</a></td>
+                            <td class="text-center">
+                                {%  if umr.is_completed %}
+                                <i class="fa-solid fa-calendar-check fa-lg cal_green"></i>
+                                {%  else %}
+                                <i class="fa-solid fa-calendar fa-lg cal_yellow"></i>
+                                {%  endif %}
+                            </td>
+                            <td class="text-center">{{ umr.get_encoded_hours }}</td>
+                            <td class="text-center">{{ umr.get_planned_hours }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-success" href="{{ umr.get_xls_url }}">
+                                    <span class="fa fa-file-excel"></span>
+                                </a>
+                                <a class="btn btn-sm btn-danger" href="{{ umr.get_pdf_url }}">
+                                    <span class="fa fa-file-pdf"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>No objects yet.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {% if is_paginated %}
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-center">
+                            <div class="mt-3">
+                                <ul class="pagination">
+                                    {% if page_obj.has_previous %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page=1">
+                                                <span>First</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                               href="?page={{ page_obj.previous_page_number }}">
+                                                <span>Previous</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <span>First</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <span>Previous</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+
+                                    {% for page in paginator.page_range %}
+                                        <li class="page-item {% if page == page_obj.number %}active{% endif %}">
+                                            <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                                        </li>
+                                    {% endfor %}
+
+                                    {% if page_obj.has_next %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                                                <span>Next</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ paginator.num_pages }}">
+                                                <span>Last</span>
+                                            </a>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <span>Next</span>
+                                            </a>
+                                        </li>
+                                        <li class="page-item disabled">
+                                            <a class="page-link" href="#">
+                                                <span>Last</span>
+                                            </a>
+                                        </li>
+                                    {% endif %}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

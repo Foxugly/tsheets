@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static i18n common_tags hijack django_bootstrap5 %}
+{% block content %}
+    <div class="d-flex justify-content-between">
+        <div class="p-2"></div>
+        <div class="p-2"><h1>{{ title }}</h1></div>
+        <div class="p-2"></div>
+    </div>
+
+    <div class="row">
+        <div class="col col-12 sm-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <div class="p-2"></div>
+                        <div class="p-2"><h3 class="mb-0">{{ model|verbose_name_plural | title }}</h3></div>
+                        <div class="p-2"><a class="add btn btn-primary" href="#"
+                                            data-form-url="{{ model.get_add_url }}"
+                                            data-next="{{ model.get_list_url }}">
+                            <span class="fa fa-plus"></span> Add {{ model|verbose_name | title }}</a></div>
+                    </div>
+                </div>
+                <table class="card-table table table-striped table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Status</th>
+                        <th class="text-center">Sum of encoded hours</th>
+                        <th class="text-center">sum of planned hours</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for obj in object_list %}
+                        <tr>
+                            <td><a href="{{ obj.get_detail_url }}">{{ obj }}</a></td>
+                            <td class="text-center">
+                                {%  if obj.is_completed == 1 %}
+                                <i class="fa-solid fa-calendar-check fa-lg cal_green"></i>
+                                {%  elif obj.is_completed == 0 %}
+                                <i class="fa-solid fa-calendar fa-lg cal_yellow"></i>
+                                {%  else %}
+                                <i class="fa-solid fa-calendar-xmark fa-lg cal_red"></i>
+                                {%  endif %}
+                            </td>
+                            <td class="text-center">{{ obj.get_sum_week }}</td>
+                            <td class="text-center">{{ obj.get_sum_max_week }}</td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-success" href="{{ obj.get_detail_url }}">
+                                    <span class="fa fa-edit"></span>
+                                </a>
+                                <a class="btn delete btn-sm btn-danger" href="#"
+                                   data-form-url="{{ obj.get_delete_url }}" data-next="{{ model.get_list_url }}">
+                                    <span class="fa fa-trash"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan=5>No objects yet.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {%  include '_card_footer.html' %}
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}

@@ -1,0 +1,12 @@
+asgiref==3.6.0
+Django==4.2
+django-bootstrap-modal-forms==3.0.2
+django-bootstrap5==23.1
+django-debug-toolbar==4.1.0
+django-extensions==3.2.1
+django-hijack==3.4.0
+django-static-fontawesome==6.4.0.0
+django-view-breadcrumbs==2.4.1
+sqlparse==0.4.4
+tzdata==2023.3
+XlsxWriter==3.1.1

@@ -1,0 +1,36 @@
+{% load i18n common_tags django_bootstrap5 %}
+<div class="modal-header">
+    <h5 class="modal-title">{{ title }}</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+</div>
+<form method="post" role="form">
+    {% csrf_token %}
+    <div class="modal-body">
+        <div class="{% if form.non_field_errors %}invalid{% endif %} mb-2">
+            {% for error in form.non_field_errors %}
+                {{ error }}
+            {% endfor %}
+        </div>
+        {% for field in form %}
+            <div class="form-group row">
+                <div class="col-3"><label for="{{ field.id_for_label }}">{{ field.label }}</label></div>
+
+                <div class="col-9">
+                    {% bootstrap_field field show_label=False %}
+                    <div class="{% if field.errors %} invalid{% endif %}">
+                        {% for error in field.errors %}
+                            <p class="help-block">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">{% trans "Submit" %}</button>
+    </div>
+</form>
+<script type="text/javascript">
+    $('select').select2({theme: 'bootstrap-5'});
+</script>

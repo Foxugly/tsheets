@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static i18n common_tags hijack django_bootstrap5 %}
+{% block content %}
+    <div class="d-flex justify-content-between">
+        <div class="p-2"></div>
+        <div class="p-2"><h1>{{ title }}</h1></div>
+        <div class="p-2"></div>
+    </div>
+    <div class="row">
+        <div class="col col-12 sm-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-center">
+                        <div class="p-2"><h3 class="mb-0">{{ model|verbose_name_plural | title }}</h3></div>
+                    </div>
+                </div>
+                <table class="card-table table table-striped table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Name</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for obj in object_list %}
+                        <tr>
+                            <td><a href="{{ obj.get_detail_url }}">{{ obj }}</a></td>
+                            <td class="text-center">
+                                {%  if umr.is_completed %}
+                                <i class="fa-solid fa-calendar-check fa-lg cal_green"></i>
+                                {%  else %}
+                                <i class="fa-solid fa-calendar fa-lg cal_yellow"></i>
+                                {%  endif %}
+                            </td>
+                            <td class="text-end">
+                                <a class="btn btn-sm btn-secondary btn-success" href="{{ obj.get_xls_url}}">
+                                    <span class="fa fa-file-excel"></span>
+                                </a>
+                                <!--<a class="btn btn-sm btn-secondary" href="#">
+                                    <span class="fa fa-file-pdf"></span>
+                                </a>-->
+                                <a class="btn btn-sm btn-secondary btn-danger" href="{{ obj.get_zip_url }}">
+                                    <span class="fa fa-file-archive"></span>
+                                </a>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td>No objects yet.</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                {%  include '_card_footer.html' %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

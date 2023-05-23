@@ -1,0 +1,54 @@
+{% load static i18n common_tags hijack django_bootstrap5 %}
+{% if user.is_authenticated %}
+<nav id="sidebarMenu" class="mh-100">
+    <div class="position-sticky mh-100" id="upper_part">
+        <select id="select_team" name="select_team" class="form-select" {% if request.user.get_n_teams <= 1  %}disabled{%  endif %}>
+            <option value="" selected disabled>Select a team</option>
+                {%  for t in request.user.get_teams %}
+                    <option value="{{ t.slug }}" {% if t == team %} selected {% endif %}>{{ t }}</option>
+                {% endfor %}
+        </select>
+        <ul class="nav navbar-nav flex-column">
+            {% if request.user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'team:team_list' %}">Teams</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'week:week_list' %}">Weeks</a>
+            </li>
+            {% if request.user.is_superuser or role == "teamleader" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'customuser:customuser_list' %}">Users</a>
+                </li>
+            {% endif %}
+            {% if request.user.is_superuser or role == "teamleader" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'project:project_list' %}">Projects</a>
+                </li>
+            {% endif %}
+            {% if request.user.is_superuser or role == "teamleader" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'projectcategory:projectcategory_list' %}">Categories by
+                        project</a>
+                </li>
+            {% endif %}
+            {% if request.user.is_superuser or role == "teamleader" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'category:category_list' %}">Categories</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'holiday:holiday_list' %}">Holidays</a>
+            </li>
+            {% if request.user.is_superuser or role == "teamleader" %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'report:monthlyreport_list' %}">Reports</a>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    <div class="d-flex align-items-end" id="lower_part">
+    </div>
+</nav>
+{%  endif %}

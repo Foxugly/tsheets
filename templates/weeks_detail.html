@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static l10n i18n common_tags hijack django_bootstrap5 %}
+{% block content %}
+    <div class="d-flex">
+        <div class="p-2 flex-fill"><a class="btn btn-secondary text-left ml-3"
+                                      href="{{ model.get_list_url }}">{% trans "Back" %}</a></div>
+        <div class="p-2 flex-fill"><h3>{{ title }}</h3></div>
+        <div class="p-2 flex-fill"></div>
+    </div>
+    <div class="row">
+        <div class="col col-12 sm-12 mb-3">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between">
+                    {% if object.has_previous_week %}
+                        <a href="{% url 'week:week_prev' object.pk %}" class="btn btn-info">Previous week</a>
+                    {% else %}
+                        <a href="{% url 'week:week_prev' object.pk %}" class="btn btn-info">Create previous
+                            week</a>
+                    {% endif %}
+                    <div>
+                        {% trans "days" %} :
+                        <div class="btn-group" role="group" aria-label="Basic radio toggle button group">
+                            {% for i in object.get_range_max_available_days %}
+                                <input type="radio" class="btn-check max_days" name="btnradio" data-value="{{ i }}" id="btnradio{{ i }}"
+                                       autocomplete="off" {% if object.days_max == i %}checked{% endif %}>
+                                <label class="btn btn-outline-primary" for="btnradio{{ i }}">{{ i }}</label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <a href="{% url 'week:week_reload' object.pk %}" class="btn btn-primary">Reload</a>
+                    <div class="p-2">{% trans 'Max. hours/day' %} : {{ object.refer_user.hours_max }}</div>
+                    {% if object.has_next_week %}
+                        <a href="{% url 'week:week_next' object.pk %}" class="btn btn-info">Next week</a>
+                    {% else %}
+                        <a href="{% url 'week:week_next' object.pk %}" class="btn btn-info">Create next week</a>
+                    {% endif %}
+                </div>
+                <table class="card-table table table-sm table-striped table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Project</th>
+                        {% for d in object.get_days %}
+                            {% if d.type == "default" %}
+                                <th class="text-center">{{ d.date }}</th>
+                            {% else %}
+                                <th class="text-center bg-secondary">{{ d.date }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for p in object.get_projects_categories_days_slots %}
+                        <tr class="table-primary">
+                            <td colspan="8"><b>{{ p.name }}</b></td>
+                        </tr>
+                        {% for c in p.categories %}
+                            <tr>
+                                <td> {{ c.name }}</td>
+                                {% for slot in c.slots %}
+                                    {% if slot.type == "default" %}
+                                        <td class="col-1"><input data-id="{{ slot.id }}" type="number" min="0"
+                                                                 class="slot form-control form-control-sm"
+                                                                 value="{{ slot.duration |unlocalize }}"></td>
+                                    {% else %}
+                                        <td class="col-1 bg-secondary"></td>
+                                    {% endif %}
+                                {% endfor %}
+                                <td class="col-1 bg-secondary"></td>
+                                <td class="col-1 bg-secondary"></td>
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    <tr class="table-secondary">
+                        <th><b>Sum</b></th>
+                        {% for swd in object.get_sum_days %}
+                            {% if swd.type == "default" %}
+                                <th id="sum_day_{{ swd.weekday }}" class="text-center">{{ swd.sum }}</th>
+                            {% else %}
+                                <th class="text-center"></th>
+                            {% endif %}
+                        {% endfor %}
+                        <th class="col-1"></th>
+                        <th class="col-1"></th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascript %}
+    $(".slot").on('change', function(){
+    var duration = $(this).val();
+    if (duration >= 0 && duration < 24){
+    var mydata = {id:$(this).data('id'), duration:$(this).val(), "csrfmiddlewaretoken" : "{{ csrf_token }}"};
+    var url = '/slot/ajax/update/';
+    $.ajax({
+    url: url,
+    type: 'POST',
+    data: mydata,
+    traditional: true,
+    dataType: 'json',
+    success: function(result){
+    var field = '#sum_day_'+result["weekday"];
+    $(field).text(result["sum_weekday"]);
+    if (!result['return']){
+    const toastLiveExample = document.getElementById('toastAlert');
+    const toast = new bootstrap.Toast(toastLiveExample);
+    $("#toast_title").text(result['toast_title']);
+    $("#toast_content").text(result['toast_content']);
+    toast.show();
+    }
+    }
+    });
+    }
+    else {
+    $(this).val("");
+    const toastLiveExample = document.getElementById('toastAlert');
+    const toast = new bootstrap.Toast(toastLiveExample);
+    $("#toast_title").text("{% trans "Duration alert" %}");
+    $("#toast_content").text("{% trans "The encoded duration is more than 24 hours." %}");
+    toast.show();
+    }
+    });
+
+    $(".max_days").on('change', function(){
+        var max_day = $(this).data("value");
+        if (max_day  >= 0 && max_day  < 7){
+            var mydata = {"id":{{object.id}}, "max_day":max_day, "csrfmiddlewaretoken" : "{{ csrf_token }}"};
+            var url = '/week/ajax/update/';
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: mydata,
+                traditional: true,
+                dataType: 'json',
+                success: function(result){
+                    if (!result['return']){
+                        const toast = new bootstrap.Toast(document.getElementById('toastAlert'));
+                        $("#toast_title").text("{% trans "Max.day alert" %}");
+                        $("#toast_content").text("{% trans "The max day is incorrect." %}");
+                        toast.show();
+                    }
+                }
+            });
+        }
+        else {
+            const toast = new bootstrap.Toast(document.getElementById('toastAlert'));
+            $("#toast_title").text("{% trans "Max.day alert" %}");
+            $("#toast_content").text("{% trans "The max day is incorrect." %}");
+            toast.show();
+        }
+    });
+
+{% endblock javascript %}

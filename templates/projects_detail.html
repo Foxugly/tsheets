@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% load static i18n common_tags hijack django_bootstrap5 %}
+{% block content %}
+    <div class="row">
+        <div class="col col-12 sm-12 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="float-left mb-0">{{ title }}</h3>
+                </div>
+                <table class="card-table table table-sm table-striped mb-0">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Project</th>
+                        {% for d in object.get_days %}
+                            {% if d.type == "default" %}
+                                <th class="text-center">{{ d.date }}</th>
+                            {% else %}
+                                <th class="text-center table-active">{{ d.date }}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    {% for p in object.get_projects_categories_days_slots %}
+                        <tr class="table-primary">
+                            <td colspan="8"><b>{{ p.name }}</b></td>
+                        </tr>
+                        {% for c in p.categories %}
+                            <tr>
+                                <td> {{ c.name }}</td>
+                                {% for slot in c.slots %}
+
+                                    {% if slot.type == "default" %}
+                                        <td class="col-1"><input data-id="{{ slot.id }}" type="number"
+                                                                 class="slot form-control form-control-sm"
+                                                                 value="{{ slot.duration }}"></td>
+                                    {% else %}
+                                        <td class="col-1 table-active"></td>
+                                    {% endif %}
+
+                                {% endfor %}
+                            </tr>
+                        {% endfor %}
+                    {% endfor %}
+                    <tr class="table-secondary">
+                        <th><b>Sum</b></th>
+                        {% for swd in object.get_sum_days %}
+                            {% if swd.type == "default" %}
+                                <th id="sum_day_{{ swd.weekday }}" class="text-center">{{ swd.sum }}</th>
+                            {% else %}
+                                <th class="text-center"></th>
+                            {% endif %}
+                        {% endfor %}
+                        <th></th>
+                        <th></th>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascript %}
+    $(".slot").on('change', function(){
+    var duration = $(this).val();
+    var mydata = {id:$(this).data('id'), duration:$(this).val(), "csrfmiddlewaretoken" : "{{ csrf_token }}"};
+    var url = '/slot/ajax/update';
+    $.ajax({
+    url: url,
+    type: 'POST',
+    data: mydata,
+    traditional: true,
+    dataType: 'json',
+    success: function(result){
+    if (result['return']){
+    console.log(result);
+    var field = '#sum_day_'+result["weekday"];
+    $(field).text(result["sum_weekday"]);
+    }
+    console.log("ok");
+    }
+    });
+    });
+{% endblock javascript %}
