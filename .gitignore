@@ -1,6 +1,32 @@
 /static/admin/
 /static/bootbox/
 /static/debug_toolbar/
+/static/django_extensions/
 /static/fontawesome/
 /static/hijack/
 /static/js/
+__pycache__/
+categories/__pycache__/
+categories/migrations/__pycache__/
+customusers/__pycache__/
+customusers/migrations/__pycache__/
+days/__pycache__/
+days/migrations/__pycache__/
+db.sqlite3
+holidays/__pycache__/
+holidays/migrations/__pycache__/
+projectcategories/__pycache__/
+projectcategories/migrations/__pycache__/
+projects/__pycache__/
+projects/migrations/__pycache__/
+reports/__pycache__/
+reports/migrations/__pycache__/
+slots/__pycache__/
+slots/migrations/__pycache__/
+        static/django_extensions/
+        teams/__pycache__/
+        teams/migrations/__pycache__/
+        tools/__pycache__/
+        tsheets/__pycache__/
+        weeks/__pycache__/
+        weeks/migrations/__pycache__/
