@@ -80,10 +80,10 @@ if settings.DEBUG:
         path('__debug__/', include(debug_toolbar.urls))]
 
 if not settings.DEBUG:
-    handler400 = '.urls.bad_request'
-    handler403 = '.urls.permission_denied'
-    handler404 = '.urls.page_not_found'
-    handler500 = '.urls.server_error'
+    handler400 = 'tsheets.urls.bad_request'
+    handler403 = 'tsheets.urls.permission_denied'
+    handler404 = 'tsheets.urls.page_not_found'
+    handler500 = 'tsheets.urls.server_error'
 
 
 def bad_request(request, exception):
@@ -101,6 +101,6 @@ def page_not_found(request, exception):
     return render(request, '404.html', context, status=404)
 
 
-def server_error(request, exception):
+def server_error(request):
     context = {}
     return render(request, '500.html', context, status=500)
