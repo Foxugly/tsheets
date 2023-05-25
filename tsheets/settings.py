@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'django_bootstrap_breadcrumbs',
     'bootstrap_modal_forms',
     'hijack',
     'hijack.contrib.admin',

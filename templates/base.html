@@ -75,6 +75,12 @@
             });
         });
 
+        $(".fade").each(function   () {
+            $(".fade").fadeTo(2000, 500).slideUp(500, function() {
+                $(".fade").slideUp(500);
+            });
+        });
+
         $(".positive").on('change', function () {
             var duration = $(this).val();
             if (duration < 0 || duration > 24) {

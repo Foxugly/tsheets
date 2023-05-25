@@ -1,5 +1,5 @@
 from bootstrap_modal_forms.forms import BSModalModelForm
-from django.contrib.auth.forms import UserChangeForm
+from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.forms import ModelForm
 
 from .models import CustomUser
@@ -29,7 +29,7 @@ class CustomUserFullForm(ModelForm):
         fields = ['username', 'first_name', 'last_name', 'email', 'language', 'hours_max', 'days_max', 'current_team', 'categories']
 
 
-class CustomUserCreationForm(BSModalModelForm):
+class CustomUserCreationForm(BSModalModelForm, UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'email', 'language']

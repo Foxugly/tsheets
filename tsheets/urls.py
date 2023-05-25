@@ -8,30 +8,38 @@ from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import path, include, reverse
 from django.utils import translation
+from django.utils.translation import check_for_language
 
-from customusers.decorators import check_lang
 from customusers.views import CustomUserUpdateView
 from teams.models import Team
 from tools.generic_views import is_ajax
 
 
 @login_required
-@check_lang
 def home(request):
     return redirect("week:week_list")
 
 
-def set_language(request):
-    if 'lang' in request.GET and 'next' in request.GET:
-        # print("request.session", request.session)
-        # if translation.LANGUAGE_SESSION_KEY in request.session:
-        #    del request.session[translation.LANGUAGE_SESSION_KEY]
-        translation.activate(request.GET.get('lang'))
-        request.LANGUAGE_CODE = request.GET.get('lang')
-        # request.session[translation.LANGUAGE_SESSION_KEY] = request.GET.get('lang')
-        return HttpResponseRedirect(request.GET.get('next'))
-    else:
-        return reverse('home')
+def set_lang(request):
+    response = None
+    if 'lang' in request.GET and check_for_language(request.GET.get('lang')):
+        user_language = request.GET.get('lang')
+        translation.activate(user_language)
+        if 'next' in request.GET:
+            response = HttpResponseRedirect(request.GET.get('next'))
+        else:
+            response = HttpResponseRedirect(reverse('home'))
+        response.set_cookie(
+            settings.LANGUAGE_COOKIE_NAME,
+            user_language,
+            max_age=settings.LANGUAGE_COOKIE_AGE,
+            path=settings.LANGUAGE_COOKIE_PATH,
+            domain=settings.LANGUAGE_COOKIE_DOMAIN,
+            secure=settings.LANGUAGE_COOKIE_SECURE,
+            httponly=settings.LANGUAGE_COOKIE_HTTPONLY,
+            samesite=settings.LANGUAGE_COOKIE_SAMESITE,
+        )
+    return response
 
 
 @login_required
@@ -62,10 +70,10 @@ urlpatterns = [
     path('slot/', include('slots.urls', namespace='slot')),
     path('user/', include('customusers.urls', namespace='customuser')),
     path('report/', include('reports.urls', namespace='report')),
-    path('lang/', set_language, name='lang'),
+    path('lang/', set_lang, name='lang'),
     path('hijack/', include('hijack.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/settings/', check_lang(CustomUserUpdateView.as_view()), name='settings'),
+    path('accounts/settings/', CustomUserUpdateView.as_view(), name='settings'),
     path('accounts/ajax/team/', set_team, name='ajax_team'),
     path('__debug__/', include('debug_toolbar.urls')),
     path('admin/', admin.site.urls),

@@ -13,7 +13,7 @@ class CustomUserCreateView(LoginRequiredMixin, GenericCreateView, BSModalCreateV
     fields = None
     form_class = CustomUserCreationForm
     template_name = 'generic_modal_update.html'
-    success_message = 'Success: new project created.'
+    success_message = 'Success: new user created.'
     success_url = reverse_lazy('project:project_list')
 
     def get_success_url(self):
