@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 from pathlib import Path
+
 from django.utils.translation import gettext_lazy as _
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -42,6 +43,7 @@ INSTALLED_APPS = [
     'hijack.contrib.admin',
     'django_extensions',
     'debug_toolbar',
+    'django_crontab',
     "django_static_fontawesome",
     "django_bootstrap5",
     'customusers',
@@ -134,7 +136,7 @@ LOCALE_PATHS = [os.path.join(BASE_DIR, 'locale'), ]
 
 STATIC_URL = '/static/'
 # ACTIVE TO PROD / COMMENT TO TEST
-#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # COMMENT TO PROD / ACTIVE TO TEST
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static'), ]
 
@@ -165,6 +167,10 @@ if DEBUG:
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CRONJOBS = [
+    ('* * * * *', 'holidays.cron.update_days_from_holiday')
+]
 
 BOOTSTRAP5 = {
 

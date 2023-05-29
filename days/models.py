@@ -22,13 +22,25 @@ class Day(GenericClass):
     refer_user = models.ForeignKey('customusers.CustomUser', verbose_name=_('user'), related_name="back_day_user",
                                    null=True, on_delete=models.CASCADE, )
     type = models.CharField(max_length=10, choices=TYPE_CHOICES, default=TYPE_CHOICES[0][0])
+    sum_day = models.PositiveIntegerField(default=0)
 
-    def get_sum_day(self):
+    def update_sum_day(self):
         sum = 0
         if self.type == self.TYPE_CHOICES[0][0]:
             for ds in self.slots.all():
                 sum += ds.duration if ds.duration else 0
-        return sum if sum % 1 else int(sum)
+        if int(sum) != self.sum_day:
+            self.sum_day = int(sum)
+            self.save()
+            self.refer_week.update_sum_week()
+
+    def clean_slots(self):
+        for s in self.slots.all():
+            s.duration = 0
+            s.save()
+        self.sum_day = 0
+        self.save()
+        self.refer_week.update_sum_week()
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

@@ -10,13 +10,15 @@ from django.urls import path, include, reverse
 from django.utils import translation
 from django.utils.translation import check_for_language
 
-from customusers.views import CustomUserUpdateView
+from customusers.views import SettingsUpdateView
+from holidays.cron import update_days_from_holiday
 from teams.models import Team
 from tools.generic_views import is_ajax
 
 
 @login_required
 def home(request):
+    update_days_from_holiday()
     return redirect("week:week_list")
 
 
@@ -73,7 +75,7 @@ urlpatterns = [
     path('lang/', set_lang, name='lang'),
     path('hijack/', include('hijack.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
-    path('accounts/settings/', CustomUserUpdateView.as_view(), name='settings'),
+    path('accounts/settings/', SettingsUpdateView.as_view(), name='settings'),
     path('accounts/ajax/team/', set_team, name='ajax_team'),
     path('__debug__/', include('debug_toolbar.urls')),
     path('admin/', admin.site.urls),

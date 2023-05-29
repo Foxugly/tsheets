@@ -41,7 +41,7 @@ class ProjectCategoryListView(LoginRequiredMixin, GenericListView):
         if self.request.user.is_superuser:
             queryset = ProjectCategory.objects.filter().order_by('refer_project__name', 'refer_category__name')
         else:
-            queryset = ProjectCategory.objects.filter(refer_project__in=self.request.user.get_teamleader_teams())
+            queryset = ProjectCategory.objects.filter(refer_team__in=self.request.user.get_teamleader_teams())
         return queryset
 
     def dispatch(self, request, *args, **kwargs):

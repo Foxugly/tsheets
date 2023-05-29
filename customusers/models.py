@@ -10,7 +10,6 @@ from django.utils.translation import gettext_lazy as _
 
 from projectcategories.models import ProjectCategory
 from projects.models import Project
-from projects.models import Project
 from slots.models import Slot
 from teams.models import Team
 from tools.generic_class import GenericClass

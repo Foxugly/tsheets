@@ -1,5 +1,6 @@
 from bootstrap_modal_forms.generic import BSModalCreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponseRedirect
 
 from tools.generic_views import *
 from .forms import CreateHolidayForm, HolidayForm
@@ -40,5 +41,15 @@ class HolidayDetailView(LoginRequiredMixin, GenericDetailView):
 
 class HolidayDeleteView(LoginRequiredMixin, GenericDeleteView):
     model = Holiday
+    success_message = 'Success: holiday removed.'
+    success_url = reverse_lazy('day:holiday_list')
 
+    def form_valid(self, form):
+        obj = self.get_object()
+        obj.to_delete = True
+        obj.done = False
+        obj.save()
+        return HttpResponseRedirect(self.get_success_url())
 
+    def delete(self):
+        pass

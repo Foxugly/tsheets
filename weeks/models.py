@@ -17,6 +17,7 @@ class WeekDate(GenericClass):
     end_date = models.DateField(null=True, blank=True, verbose_name=_("end date"), )
     days_max = models.PositiveIntegerField(default=5)
 
+
     def refresh_days_max(self):
         hs = Holiday.objects.filter(day__range=(self.start_date, self.end_date))
         self.days_max = 5 - len(hs)
@@ -41,6 +42,7 @@ class Week(GenericClass):
     refer_team = models.ForeignKey('teams.Team', verbose_name=_('team'), related_name="week_refer_team",
                                    null=True, on_delete=models.CASCADE, )
     days_max = models.PositiveIntegerField(default=5)
+    sum_week = models.PositiveIntegerField(default=0)
     lock = models.BooleanField(default=False)
     deprecated = models.BooleanField(default=False)
 
@@ -99,23 +101,36 @@ class Week(GenericClass):
         else:
             return False
 
+    def get_holidays(self):
+        return Holiday.objects.filter(day__range=(self.weekdate.start_date, self.weekdate.end_date))
+
     def get_sum_days(self):
         sum_days = []
-        for day in self.days.all().order_by("day__day").order_by("day"):
-            sum_days.append({"type": day.type, "sum": day.get_sum_day(), "weekday": day.day.weekday()})
+        hds = self.get_holidays()
+        if self.days_max > 5 - len(hds):
+            self.days_max = 5 - len(hds)
+            self.save()
+        for day in self.days.all().order_by("day"):
+            sum_days.append({"type": day.type, "sum": day.sum_day, "weekday": day.day.weekday()})
         return sum_days
 
-    def get_sum_week(self):
-        sum_days = 0
-        for day in self.days.all().order_by("day__day"):
-            sum_days += day.get_sum_day()
-        return sum_days if sum_days % 1 else int(sum_days)
+    def update_sum_week(self):
+        sum = 0
+        hds = self.get_holidays()
+        if self.days_max > 5 - len(hds):
+            self.days_max = 5 - len(hds)
+            self.save()
+        for day in self.days.all():
+            sum += day.sum_day
+        if sum != self.sum_week:
+            self.sum_week = sum
+            self.save()
 
     def get_sum_max_week(self):
         sum_days = 0
         for day in self.days.all().order_by("day__day"):
             if day.type == Day.TYPE_CHOICES[0][0]:
-                sum_days += settings.MAX_HOURS_DAY
+                sum_days += settings.MAX_HOURS_DAY  # TODO get from user
         return sum_days if sum_days % 1 else int(sum_days)
 
     def is_completed(self):

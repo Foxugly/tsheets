@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 
 from categories.models import Category
 from projectcategories.models import ProjectCategory
-from teams.models import Team
 from tools.generic_class import GenericClass
 
 
@@ -51,7 +50,6 @@ class Project(GenericClass):
                     self.project_categories.add(pc)
         # check teams
         # TODO adapt if change team
-        print(self.project_categories.all())
 
     def __str__(self):
         return "%s" % (self.name)

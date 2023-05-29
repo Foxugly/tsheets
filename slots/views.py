@@ -16,7 +16,7 @@ def slot_ajax_update(request):
         s = Slot.objects.get(id=request.POST['id'])
         s.duration = request.POST['duration'] if request.POST['duration'] else 0
         s.save()
-        sum_day = s.refer_day.get_sum_day()
+        sum_day = s.refer_day.sum_day
         results['sum_weekday'] = str(sum_day)
         if sum_day < 0:
             results['return'] = False
@@ -27,11 +27,11 @@ def slot_ajax_update(request):
             results['return'] = False
             results['toast_title'] = _("Duration alert")
             results['toast_content'] = _(
-                "The encoded duration for the day is more than %d hours." % settings.MAX_HOURS_DAY)
+                "The encoded duration for the day is more than %d hours." % request.user.hours_max)
         else:
             results['return'] = True
         results['weekday'] = str(s.refer_day.day.weekday())
-        results['sum_weekday'] = str(s.refer_day.get_sum_day())
+        results['sum_weekday'] = str(s.refer_day.sum_day)
     else:
         results['return'] = False
         results['toast_title'] = _("Connexion")

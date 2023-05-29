@@ -27,7 +27,9 @@
                     <thead>
                     <tr>
                         <th>Name</th>
-                        {% if request.user.is_teamleader %}
+                        {% if request.user.is_superuser or role == "teamleader" %}
+                            <th class="text-center">Done</th>
+                            <th class="text-center">to_delete</th>
                             <th class="text-end">Actions</th>
                         {% endif %}
                     </tr>
@@ -36,7 +38,9 @@
                     {% for obj in object_list %}
                         <tr>
                             <td>{{ obj }}</td>
-                            {% if request.user.is_teamleader %}
+                            {% if request.user.is_superuser or role == "teamleader" %}
+                                <td class="text-center">{{ obj.done }}</td>
+                                <td class="text-center">{{ obj.to_delete }}</td>
                                 <td class="text-end">
                                     <a class="btn delete btn-sm btn-danger" href="#"
                                        data-form-url="{{ obj.get_delete_url }}" data-next="{{ obj.get_list_url }}">

@@ -93,7 +93,6 @@ class MonthlyReport(GenericClass):
 
     def get_umrs_list(self):
         l = self.umrs.all().order_by('year', '-month')
-        print(l)
         return l
 
     def get_xls_url(self):

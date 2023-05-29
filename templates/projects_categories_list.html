@@ -23,7 +23,7 @@
                     <thead>
                     <tr>
                         <th  class="text-center">Name</th>
-                        {% if user.is_superuser %}
+                        {% if user.is_superuser or role == "teamleader" %}
                             <th  class="text-center">Project</th>
                             <th  class="text-center">Members</th>
                             <th  class="text-center">Active</th>
@@ -35,7 +35,7 @@
                     {% for obj in object_list %}
                         <tr>
                             <td><a href="{{ obj.get_change_url }}">{{ obj.refer_category }}</a></td>
-                            {% if user.is_superuser %}
+                            {% if user.is_superuser or role == "teamleader" %}
                                 <td class="text-center"><a href="{{ obj.refer_project.get_change_url }}">{{ obj.refer_project }}</a> - <a href="{{ obj.get_team.get_change_url }}">{{ obj.get_team }}</a></td>
                                 <td class="text-center">{{ obj.members.all | list_user_link |safe }}</td>
                                 <td class="text-center">

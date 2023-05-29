@@ -57,9 +57,6 @@ class CustomUserUpdateView(GenericUpdateView):
         self.app_name = "accounts"
         self.model_name = self.model._meta.model_name
 
-    def get_object(self):
-        return self.request.user
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['model'] = self.model
@@ -68,6 +65,23 @@ class CustomUserUpdateView(GenericUpdateView):
     def dispatch(self, request, *args, **kwargs):
         self.list_access.update(request.user.current_team.get_teamleaders(), [self.request.user])
         return super().dispatch(request, *args, **kwargs)
+
+
+class SettingsUpdateView(CustomUserUpdateView):
+    model = CustomUser
+    fields = None
+    form_class = CustomUserFullForm
+    template_name = 'generic_update.html'
+    success_url = reverse_lazy('settings')
+    success_message = _('Changes saved.')
+
+    def __init__(self, *args, **kwargs):
+        super(GenericUpdateView, self).__init__(*args, **kwargs)
+        self.app_name = "accounts"
+        self.model_name = self.model._meta.model_name
+
+    def get_object(self):
+        return self.request.user
 
 
 class CustomUserDetailView(LoginRequiredMixin, GenericDetailView):

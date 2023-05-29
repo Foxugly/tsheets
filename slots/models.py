@@ -17,6 +17,7 @@ class Slot(GenericClass):
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
+        self.refer_day.update_sum_day()
 
     def as_json(self, **kwargs):
         duration = ""
