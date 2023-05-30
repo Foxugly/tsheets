@@ -57,7 +57,7 @@ class Week(GenericClass):
                                                      end_date=first_day_next_week + timedelta(days=6))
         if created:
             wd.refresh_days_max()
-        w, created = Week.objects.get_or_create(weekdate=wd, refer_user=self.refer_user)
+        w, created = Week.objects.get_or_create(weekdate=wd, refer_user=self.refer_user, refer_team=self.refer_team)
         if created:
             w.days_max = min(self.days_max, self.refer_user.days_max)
             w.save()
@@ -70,7 +70,7 @@ class Week(GenericClass):
         wd = WeekDate.objects.filter(week=next_week, year=next_year, start_date=first_day_next_week,
                                      end_date=first_day_next_week + timedelta(days=6))
         if len(wd):
-            w = Week.objects.filter(weekdate=wd[0], refer_user=self.refer_user)
+            w = Week.objects.filter(weekdate=wd[0], refer_user=self.refer_user, refer_team=self.refer_team)
             return True if len(w) else False
         else:
             return False
