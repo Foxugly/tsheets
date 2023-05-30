@@ -47,7 +47,7 @@ class WeekDetailView(LoginRequiredMixin, GenericDetailView):
         return context
 
     def dispatch(self, request, *args, **kwargs):
-        self.list_access.update(self.object.refer_team.get_teamleaders(), [self.get_object().refer_user])
+        self.list_access.update(self.get_object().refer_team.get_teamleaders(), [self.get_object().refer_user])
         return super().dispatch(request, *args, **kwargs)
 
 
