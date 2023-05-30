@@ -17,10 +17,8 @@ class WeekDate(GenericClass):
     end_date = models.DateField(null=True, blank=True, verbose_name=_("end date"), )
     days_max = models.PositiveIntegerField(default=5)
 
-
     def refresh_days_max(self):
-        hs = Holiday.objects.filter(day__range=(self.start_date, self.end_date))
-        self.days_max = 5 - len(hs)
+        self.days_max = 5 - Holiday.objects.filter(day__range=(self.start_date, self.end_date)).count()
         self.save()
 
     def __str__(self):
@@ -47,7 +45,7 @@ class Week(GenericClass):
     deprecated = models.BooleanField(default=False)
 
     def get_range_max_available_days(self):
-        return range(0, len(self.days.filter(type=Day.TYPE_CHOICES[0][0])) + 1)
+        return range(0, self.days.filter(type=Day.TYPE_CHOICES[0][0]).count() + 1)
 
     def get_next_week(self):
         first_day_next_week = self.weekdate.start_date + timedelta(days=7)
@@ -69,9 +67,9 @@ class Week(GenericClass):
         next_year = first_day_next_week.isocalendar().year
         wd = WeekDate.objects.filter(week=next_week, year=next_year, start_date=first_day_next_week,
                                      end_date=first_day_next_week + timedelta(days=6))
-        if len(wd):
+        if wd.exists():
             w = Week.objects.filter(weekdate=wd[0], refer_user=self.refer_user, refer_team=self.refer_team)
-            return True if len(w) else False
+            return True if w.exists() else False
         else:
             return False
 
@@ -95,9 +93,9 @@ class Week(GenericClass):
         prev_year = first_day_prev_week.isocalendar().year
         wd = WeekDate.objects.filter(week=prev_week, year=prev_year, start_date=first_day_prev_week,
                                      end_date=first_day_prev_week + timedelta(days=6))
-        if len(wd):
+        if wd.exists():
             w = Week.objects.filter(weekdate=wd[0], refer_user=self.refer_user)
-            return True if len(w) else False
+            return True if w.exists() else False
         else:
             return False
 
@@ -106,9 +104,9 @@ class Week(GenericClass):
 
     def get_sum_days(self):
         sum_days = []
-        hds = self.get_holidays()
-        if self.days_max > 5 - len(hds):
-            self.days_max = 5 - len(hds)
+        count_hds = self.get_holidays().count()
+        if self.days_max > 5 - count_hds:
+            self.days_max = 5 - count_hds
             self.save()
         for day in self.days.all().order_by("day"):
             sum_days.append({"type": day.type, "sum": day.sum_day, "weekday": day.day.weekday()})
@@ -116,9 +114,9 @@ class Week(GenericClass):
 
     def update_sum_week(self):
         sum = 0
-        hds = self.get_holidays()
-        if self.days_max > 5 - len(hds):
-            self.days_max = 5 - len(hds)
+        count_hds = self.get_holidays().count()
+        if self.days_max > 5 - count_hds:
+            self.days_max = 5 - count_hds
             self.save()
         for day in self.days.all():
             sum += day.sum_day
@@ -144,7 +142,7 @@ class Week(GenericClass):
             h = Holiday.objects.filter(day=d)
             if i >= 5:
                 days.append({'date': date_label, 'type': "weekend"})
-            elif len(h):
+            elif h.exists():
                 days.append({'date': date_label, 'type': "holiday"})
             else:
                 days.append({'date': date_label, 'type': "default"})
@@ -181,7 +179,6 @@ class Week(GenericClass):
                     if len(s):
                         slots.append(s[0].as_json())
                     else:
-                        # slots.append({'type': "weekend"})
                         slots.append({'type': Day.TYPE_CHOICES[2][0]})  # holiday
                 cats.append({'name': c.name, 'slots': slots})
             projects.append({'name': p, 'categories': cats})
@@ -203,7 +200,7 @@ class Week(GenericClass):
             d, created = Day.objects.get_or_create(day=self.weekdate.start_date + timedelta(days=i), refer_week=self,
                                                    refer_user=self.refer_user)
             if created:
-                if len(Holiday.objects.filter(day=d.day)):
+                if Holiday.objects.filter(day=d.day).exists():
                     d.type = Day.TYPE_CHOICES[2][0]  # holiday
                 d.save()
             if d not in self.days.all():

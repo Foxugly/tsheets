@@ -22,4 +22,3 @@ class Holiday(GenericClass):
 
     def get_mr(self):
         return MonthlyReport.objects.filter(year=self.day.year, month=self.day.month)
-

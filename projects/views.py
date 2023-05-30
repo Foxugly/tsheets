@@ -18,7 +18,6 @@ class ProjectCreateView(LoginRequiredMixin, GenericCreateView, BSModalCreateView
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["user"] = self.request.user
-        self.user = self.request.user
         return context
 
     def form_valid(self, form):
@@ -41,12 +40,9 @@ class ProjectListView(LoginRequiredMixin, GenericListView):
     template_name = 'projects_list.html'
 
     def get_queryset(self):
-        queryset = None
-        if self.request.user.is_superuser:
-            queryset = Project.objects.all().order_by('name')
-        else:
-            queryset = self.request.user.current_team.projects.all().order_by('name')
-        return queryset
+        return Project.objects.all().order_by(
+            'name') if self.request.user.is_superuser else self.request.user.current_team.projects.all().order_by(
+            'name')
 
     def dispatch(self, request, *args, **kwargs):
         self.list_access.update(self.request.user.current_team.get_teamleaders())
@@ -57,14 +53,6 @@ class ProjectUpdateView(LoginRequiredMixin, GenericUpdateView):
     model = Project
     fields = None
     form_class = ProjectForm
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        return kwargs
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        return context
 
     def dispatch(self, request, *args, **kwargs):
         self.list_access.update(self.get_object().refer_team.get_teamleaders())
@@ -93,4 +81,3 @@ class ProjectDeleteView(LoginRequiredMixin, BSModalDeleteView):
     def dispatch(self, request, *args, **kwargs):
         self.list_access.update(self.get_object().refer_team.get_teamleaders())
         return super().dispatch(request, *args, **kwargs)
-

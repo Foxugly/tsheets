@@ -34,7 +34,7 @@ class UserMonthlyReportDetailView(LoginRequiredMixin, GenericDetailView):
 
 def generate_xls_umr(request, mr_pk, pk):
     umr = UserMonthlyReport.objects.get(pk=pk)
-    path, filename = umr.generate_umr()
+    path, filename = umr.generate_xls_umr()
     if os.path.exists(path):
         with open(path, "rb") as file:
             response = HttpResponse(file.read(),
@@ -44,12 +44,19 @@ def generate_xls_umr(request, mr_pk, pk):
 
 
 def generate_pdf_umr(request, mr_pk, pk): #TODO
-    pass
+    umr = UserMonthlyReport.objects.get(pk=pk)
+    path, filename = umr.generate_pdf_umr()
+    if os.path.exists(path):
+        with open(path, "rb") as file:
+            response = HttpResponse(file.read(),
+                                    content_type='application/pdf')
+            response['Content-Disposition'] = 'attachment; filename=%s' % filename
+        return response
 
 
 def generate_xls_mr(request, pk):
     mr = MonthlyReport.objects.get(pk=pk)
-    path, filename = mr.generate_mr()
+    path, filename = mr.generate_xls_mr()
     if os.path.exists(path):
         with open(path, "rb") as file:
             response = HttpResponse(file.read(),

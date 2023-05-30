@@ -44,18 +44,18 @@ class ProjectCategory(GenericClass):
 def projectcategories_members_changed(sender, instance, action, *args, **kwargs):
     if action == "post_add":
         for pk in kwargs["pk_set"]:
-            if len(instance.members.all()):
+            if instance.members.all().exists():
                 users = instance.members.filter(pk=pk)
-                if len(users):
+                if user.exists():
                     user = users[0]
                     if instance not in user.categories.all():
                         user.categories.add(instance)
 
     elif action == "pre_remove":
         for pk in kwargs["pk_set"]:
-            if len(instance.members.all()):
+            if instance.members.all().exists():
                 users = instance.members.filter(pk=pk)
-                if len(users):
+                if users.exists():
                     user = users[0]
                     if instance in user.categories.all():
                         user.categories.remove(instance)

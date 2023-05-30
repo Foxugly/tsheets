@@ -35,32 +35,16 @@ class CustomUser(AbstractUser, GenericClass):
         return self.username if not (self.first_name and self.last_name) else self.get_full_name()
 
     def get_teams(self):
-        l = []
-        for t in Team.objects.filter(deprecated=False):
-            if self in t.get_all_members():
-                l.append(t)
-        return l
+        return [t for t in Team.objects.filter(deprecated=False) if self in t.get_all_members()]
 
     def get_teamleader_teams(self):
-        l = []
-        for t in Team.objects.filter(deprecated=False).order_by("name"):
-            if t.is_teamleader(self):
-                l.append(t)
-        return l
+        return [t for t in Team.objects.filter(deprecated=False).order_by("name") if t.is_teamleader(self)]
 
     def get_teamleader_project(self):
-        l = []
-        for t in self.get_teamleader_teams():
-            for p in t.projects.all().order_by("name"):
-                l.append(p)
-        return l
+        return [p for t in self.get_teamleader_teams() for p in t.projects.all().order_by("name")]
 
     def get_member_teams(self):
-        l = []
-        for t in Team.objects.filter(deprecated=False).order_by("name"):
-            if t.is_member(self):
-                l.append(t)
-        return l
+        return [t for t in Team.objects.filter(deprecated=False).order_by("name") if t.is_member(self)]
 
     def get_n_teams(self):
         return len(self.get_teams())
@@ -93,18 +77,18 @@ class CustomUser(AbstractUser, GenericClass):
 def customuser_categories_changed(sender, instance, action, *args, **kwargs):
     if action == "post_add":
         for pk in kwargs["pk_set"]:
-            if len(instance.categories.all()):
+            if instance.categories.all().exists():
                 pcs = instance.categories.filter(pk=pk)
-                if len(pcs):
+                if pcs.exists():
                     pc = pcs[0]
                     if instance not in pc.members.all():
                         pc.members.add(instance)
 
     elif action == "pre_remove":
         for pk in kwargs["pk_set"]:
-            if len(instance.categories.all()):
+            if instance.categories.all().exists():
                 pcs = instance.categories.filter(pk=pk)
-                if len(pcs):
+                if pcs.exists():
                     pc = pcs[0]
                     if instance in pc.members.all():
                         pc.members.remove(instance)

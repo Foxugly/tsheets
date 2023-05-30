@@ -1,7 +1,7 @@
-from tools.generic_class import GenericClass
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from datetime import datetime
+
+from tools.generic_class import GenericClass
 
 
 class Slot(GenericClass):
@@ -21,7 +21,7 @@ class Slot(GenericClass):
 
     def as_json(self, **kwargs):
         duration = ""
-        if self.duration and self.duration > 0 :
+        if self.duration and self.duration > 0:
             duration = self.duration if self.duration % 1 else int(self.duration)
         d = {'id': str(self.id), 'can_edit': True, 'duration': duration, 'type': self.refer_day.type}
         return d

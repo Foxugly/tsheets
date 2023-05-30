@@ -101,7 +101,7 @@ def search_week(request):
         if 'user' in request.POST and len(request.POST['user']) and 'week' in request.POST and len(
                 request.POST['week']):
             weeks = Week.objects.filter(refer_user__id=request.POST['user'], weekdate__id=request.POST['week'])
-            if len(weeks):
+            if weeks.exists():
                 results['return'] = True
                 results['url'] = weeks[0].get_detail_url()
             else:

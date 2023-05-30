@@ -27,8 +27,7 @@ class Day(GenericClass):
     def update_sum_day(self):
         sum = 0
         if self.type == self.TYPE_CHOICES[0][0]:
-            for ds in self.slots.all():
-                sum += ds.duration if ds.duration else 0
+            sum += sum([ds.duration for ds in self.slots.all() if ds.duration])
         if int(sum) != self.sum_day:
             self.sum_day = int(sum)
             self.save()

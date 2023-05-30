@@ -1,3 +1,4 @@
+import itertools
 import os
 from calendar import monthrange
 from datetime import date
@@ -7,8 +8,15 @@ from django.conf import settings
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from reportlab.lib.pagesizes import A4
+from reportlab.pdfgen import canvas
 
 from tools.generic_class import GenericClass
+
+
+def grouper(iterable, n):
+    args = [iter(iterable)] * n
+    return itertools.zip_longest(*args)
 
 
 class UserMonthlyReport(GenericClass):
@@ -60,11 +68,11 @@ class UserMonthlyReport(GenericClass):
                     worksheet.write('A%s' % line, str(slot.refer_day.day))
                     worksheet.write('B%s' % line, str(slot.refer_category.refer_project.name))
                     worksheet.write('C%s' % line, str(slot.refer_category.refer_category.name))
-                    worksheet.write('D%s' % line, str(slot.duration))
+                    worksheet.write('D%s' % line, float(slot.duration))
                     line += 1
         return workbook
 
-    def generate_umr(self):
+    def generate_xls_umr(self):
         filename = "%s%02d_timesheets_report_%s.xlsx" % (self.year, self.month, self.user.get_folder_name())
         path = os.path.join(self.user.get_path_report_folder(self.month, self.year), filename)
         if os.path.exists(path):
@@ -72,6 +80,39 @@ class UserMonthlyReport(GenericClass):
         workbook = xlsxwriter.Workbook(path)
         workbook = self.generate_umr_sheet(workbook)
         workbook.close()
+        return path, filename
+
+    def generate_pdf_umr(self):
+        filename = "%s%02d_timesheets_report_%s.pdf" % (self.year, self.month, self.user.get_folder_name())
+        path = os.path.join(self.user.get_path_report_folder(self.month, self.year), filename)
+        if os.path.exists(path):
+            os.remove(path)
+        data = [("Days", "Project", "categories", "hours")]
+        for day in self.days.all().order_by('day'):
+            for slot in day.slots.all():
+                if slot.duration:
+                    data.append((str(slot.refer_day.day), str(slot.refer_category.refer_project.name),
+                                 str(slot.refer_category.refer_category.name), float(slot.duration)))
+
+        c = canvas.Canvas(path, pagesize=A4)
+        w, h = A4
+        max_rows_per_page = 45
+        x_offset = 50
+        y_offset = 50
+        padding = 15
+
+        xlist = [x + x_offset for x in [0, 180, 280, 380, 480]]
+        ylist = [h - y_offset - i * padding for i in range(max_rows_per_page + 1)]
+
+        for rows in grouper(data, max_rows_per_page):
+            rows = tuple(filter(bool, rows))
+            c.grid(xlist, ylist[:len(rows) + 1])
+            for y, row in zip(ylist[:-1], rows):
+                for x, cell in zip(xlist, row):
+                    c.drawString(x + 2, y - padding + 3, str(cell))
+            c.showPage()
+
+        c.save()
         return path, filename
 
     class Meta:
@@ -102,7 +143,7 @@ class MonthlyReport(GenericClass):
         return reverse('%s:mr_zip' % self.app_name, kwargs={'pk': self.pk})
 
     def get_count_holidays(self):
-        return len(self.holidays.all())
+        return self.holidays.all().count()
 
     def is_completed(self):
         completed = True
@@ -126,7 +167,7 @@ class MonthlyReport(GenericClass):
         create_if_not_exists(path)
         return path
 
-    def generate_mr(self):
+    def generate_xls_mr(self):
         filename = "%s%02d_timesheets_report_all.xlsx" % (self.year, self.month)
         path = os.path.join(self.get_path_report_folder(), filename)
         if os.path.exists(path):

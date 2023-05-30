@@ -67,17 +67,17 @@ class Team(GenericClass):
 def team_projects_changed(sender, instance, action, *args, **kwargs):
     if action == "post_add":
         for pk in kwargs["pk_set"]:
-            if len(instance.projects.all()):
+            if instance.projects.all().exists():
                 projects = instance.projects.filter(pk=pk)
-                if len(projects):
+                if projects.exists():
                     project = projects[0]
                     project.refer_team = instance
                     project.save()
     elif action == "pre_remove":
         for pk in kwargs["pk_set"]:
-            if len(instance.projects.all()):
+            if instance.projects.all().exists():
                 projects = instance.projects.filter(pk=pk)
-                if len(projects):
+                if projects.exists():
                     project = projects[0]
                     project.refer_team = None
                     project.save()

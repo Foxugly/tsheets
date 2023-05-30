@@ -1,6 +1,5 @@
 import json
 
-from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.utils.translation import gettext as _
@@ -12,7 +11,7 @@ from .models import Slot
 @login_required
 def slot_ajax_update(request):
     results = {}
-    if is_ajax(request): #TODO check access
+    if is_ajax(request):  # TODO check access
         s = Slot.objects.get(id=request.POST['id'])
         s.duration = request.POST['duration'] if request.POST['duration'] else 0
         s.save()
