@@ -87,7 +87,7 @@ class UserMonthlyReport(GenericClass):
         path = os.path.join(self.user.get_path_report_folder(self.month, self.year), filename)
         if os.path.exists(path):
             os.remove(path)
-        data = [("Days", "Project", "categories", "hours")]
+        data = [("Days", "Project", "Categories", "Hours")]
         for day in self.days.all().order_by('day'):
             for slot in day.slots.all():
                 if slot.duration:
@@ -96,11 +96,20 @@ class UserMonthlyReport(GenericClass):
 
         c = canvas.Canvas(path, pagesize=A4)
         w, h = A4
-        max_rows_per_page = 45
+        max_rows_per_page = 40
         x_offset = 50
-        y_offset = 50
+        y_offset = 150
         padding = 15
 
+        xtitle = [x + x_offset for x in [0, 180, 330, 480]]
+        c.grid(xtitle, [h - 10, h - y_offset + 10])
+        padding = 15
+        data_title = [["Customer Name", self.team], ["Name", self.user.get_full_name()],
+                      ["Total Hours", self.get_encoded_hours()], ["Total Days", self.get_encoded_hours() / 8]]
+        for i, line in enumerate(data_title):
+            c.drawString(55, h - (i * padding) - 25, " %s : %s" % (line[0], line[1]))
+        c.drawString(250, h - 25, "Signature Customer")
+        c.drawString(400, h - 25, "Signature employee")
         xlist = [x + x_offset for x in [0, 180, 280, 380, 480]]
         ylist = [h - y_offset - i * padding for i in range(max_rows_per_page + 1)]
 
