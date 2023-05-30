@@ -134,7 +134,7 @@ class Week(GenericClass):
         return sum_days if sum_days % 1 else int(sum_days)
 
     def is_completed(self):
-        return -1 if self.get_sum_week() == 0 else 1 if self.get_sum_max_week() == self.get_sum_week() else 0
+        return -1 if self.sum_week == 0 else 1 if self.get_sum_max_week() == self.sum_week else 0
 
     def get_days(self):
         days = []
