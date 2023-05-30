@@ -46,7 +46,7 @@ class UserMonthlyReport(GenericClass):
     def get_encoded_hours(self):
         sum = 0
         for d in self.days.filter(type="default"):
-            sum += d.get_sum_day()
+            sum += d.sum_day
         return sum if sum % 1 else int(sum)
 
     def generate_umr_sheet(self, workbook):
